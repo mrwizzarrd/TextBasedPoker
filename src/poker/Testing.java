@@ -2,8 +2,8 @@ package poker;
 
 public class Testing {
     public static void main(String[] args) {
-        Card AofH = new Card(Rank.ACE, Suit.HEARTS);
+        Deck dck = new Deck();
 
-        System.out.println(AofH);
+        System.out.println(dck);
     }
 }
