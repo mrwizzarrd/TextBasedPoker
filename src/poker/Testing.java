@@ -5,5 +5,9 @@ public class Testing {
         Deck dck = new Deck();
 
         System.out.println(dck);
+
+        dck.shuffleDeck();
+
+        System.out.println(dck);
     }
 }

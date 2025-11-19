@@ -2,6 +2,7 @@ package poker;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.Random;
 
 public class Deck {
 
@@ -34,6 +35,24 @@ public class Deck {
 
         }
 
+    }
+
+    /*Uses the Fisher-Yates Shuffle Algorithm*/
+    public void shuffleDeck(){
+        Random rnd = new Random();
+        for(int j = 51; j >= 0; j--){
+            Card currentCard = this.deck.get(j);
+            int deckIndex = rnd.nextInt(j+1);
+            Card deckIndexCard = this.deck.get(deckIndex);
+            this.deck.set(deckIndex, currentCard);
+            this.deck.set(j, deckIndexCard);
+        }
+    }
+
+    public Card drawCard(){
+        Card drawnCard = this.deck.get(0);
+        this.deck.remove(0);
+        return drawnCard;
     }
 
     @Override
