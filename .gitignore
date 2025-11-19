@@ -33,3 +33,6 @@ Test*
 *test*
 *Test*
 Testing.java
+
+#workspaces
+*.code-workspace
