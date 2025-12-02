@@ -1,0 +1,17 @@
+Okay this is a note for myself to get the workflow in order
+
+
+_____Core Foundation_____
+Cards/Deck Classes **DONE**
+Hand Classes (PlayerHand, Community Hand, Abstract Hand) **DONE**
+
+____Core Structure and Logic____
+Players
+Dealer
+Pot
+Dealing Logic
+
+____Game Logic____
+Betting Round Logic
+Game Flow
+Hand Evaluator

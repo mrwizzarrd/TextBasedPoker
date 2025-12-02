@@ -6,6 +6,7 @@ public class Player {
     private int chips;
     private int currentBet;
     private boolean folded;
+    private int roundContribution = 0;
 
 
     public Player(String name, int chips){
@@ -73,9 +74,36 @@ public class Player {
         currentBet += betAmount;
     }
 
+    public int getRoundContribution(){
+        return this.roundContribution;
+    }
+
+    public void setRoundContribution(int RC){
+        this.roundContribution = RC;
+    }
+
+    public void addToRoundContribution(int amount){
+        this.roundContribution += amount;
+        this.chips -= amount;
+    }
+
+    public void resetRoundContribution(){
+        this.roundContribution = 0;
+    }
+
     public void resetPlayer(){
         this.folded = false;
         this.currentBet = 0;
         this.hand = null;
+        this.roundContribution = 0;
+    }
+
+    @Override
+    public String toString(){
+        String PlayerDetails = new String("Player Name: %name%\nHand: %hand%\nChips: %chips%");
+        PlayerDetails = PlayerDetails.replace("%name%", this.name);
+        PlayerDetails = PlayerDetails.replace("%hand%", this.hand.toString());
+        PlayerDetails = PlayerDetails.replace("%chips%", String.valueOf(this.chips));
+        return PlayerDetails;
     }
 }
