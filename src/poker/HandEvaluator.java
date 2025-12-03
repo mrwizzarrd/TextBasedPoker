@@ -93,6 +93,14 @@ public class HandEvaluator {
                 consecutive = 0;
             }
         }
+        if(rankFreq[12] > 0 && 
+           rankFreq[0] > 0 && 
+           rankFreq[1] > 0 && 
+           rankFreq[2] > 0 && 
+           rankFreq[3] > 0){
+            straightHigh = 3;
+            isStraight = true;
+           }
 
         int sfHigh = -1;
         if(isStraight && isFlush){
