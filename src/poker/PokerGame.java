@@ -86,7 +86,7 @@ public class PokerGame {
         while(true){
             PlayerAction bettingAction;
             Player p = players.get(currentIndex);
-            if(p.hasFolded()){
+            if(p.hasFolded() || p.getChips() == 0){
                 currentIndex = (currentIndex + 1) % players.size();
                 continue;
             }
@@ -135,6 +135,16 @@ public class PokerGame {
         for(Player p : players){
             p.resetPlayer();
         }
+
+        //removes any players who are broke
+        for(int i = players.size(); i >= 0; i--){
+            Player p = players.get(i);
+            if(p.getChips() == 0){
+                players.remove(p);
+                continue;
+            }
+        }
+
 
         rotateDealer();
 
