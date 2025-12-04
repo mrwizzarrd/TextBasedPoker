@@ -214,6 +214,124 @@ public class HandEvaluator {
             }
         }
 
+        //handle tie scenarios
+
+        ArrayList<Integer> tiebreaks = new ArrayList<>();
+
+        //int[] tie_breakers = {};
+
+        switch (best) {
+            case STRAIGHT_FLUSH:
+                tiebreaks.add(straightHigh);
+                break;
+            case FOUR_KIND:
+                int fourKindHigh = -1;
+                int kicker = -1;
+                for(int r = 0; r < 13; r++){
+                    if(rankFreq[r] == 4){
+                        fourKindHigh = r;
+                    }
+                }
+                for(int r = 12; r >= 0; r--){
+                    if(rankFreq[r] == 1){
+                        kicker = r;
+                        break;
+                    }
+                }
+                tiebreaks.add(fourKindHigh);
+                tiebreaks.add(kicker);
+                break;
+            case FULL_HOUSE:
+                int tripsHigh = -1;
+                int highPair = -1;
+                for (int r = 0; r < 13; r++) {
+                    if(rankFreq[r] == 3 && r > tripsHigh){
+                        tripsHigh = r;
+                    } else if(rankFreq[r] == 2 && r > highPair){
+                        highPair = r;
+                    }
+                }
+                tiebreaks.add(tripsHigh);
+                tiebreaks.add(highPair);
+                break;
+            case FLUSH:
+                int SuitedIndex = -1;
+                ArrayList<Card> suited = new ArrayList<>();
+                for(int s = 0; s < 4; s++){
+                    if(suitFreq[s] >= 5){
+                        SuitedIndex = s;
+                        break;
+                    }
+                }
+
+                for(Card c : cards){
+                    if(c.getSuit().ordinal() == SuitedIndex){
+                        suited.add(c);
+                    }
+                }
+                suited.sort((a, b) -> b.getValue().ordinal() - a.getValue().ordinal());
+
+                for (Card card : suited) {
+                    tiebreaks.add(card.getValue().ordinal());
+                }
+                break;
+            case STRAIGHT:
+                tiebreaks.add(straightHigh);
+                break;
+            case TWO_PAIR:
+                int bestPair = -1;
+                int runnerUp = -1;
+                kicker = -1;
+
+                for(int r = 0; r < 13; r++){
+                    if(rankFreq[r] == 2 && r > bestPair){
+                        bestPair = r;
+                    } else if(rankFreq[r] == 2 && r > runnerUp){
+                        runnerUp = r;
+                    } else if(rankFreq[r] == 1 && r > kicker){
+                        kicker = r;
+                    }
+                }
+                tiebreaks.add(bestPair);
+                tiebreaks.add(runnerUp);
+                tiebreaks.add(kicker);
+                break;
+            case ONE_PAIR:
+                int pairRank = -1;
+                int kicker1 = -1;
+                int kicker2 = -1;
+                int kicker3 = -1;
+                for(int r = 0; r < 13; r++){
+                    if(rankFreq[r] == 2){
+                        pairRank = r;
+                    } else if(rankFreq[r] == 1 && r > kicker1){
+                        kicker1 = r;
+                    } else if(rankFreq[r] == 1 && r > kicker2){
+                        kicker2 = r;
+                    } else if(rankFreq[r] == 1 && r > kicker3){
+                        kicker3 = r;
+                    }
+                }
+                tiebreaks.add(pairRank);
+                tiebreaks.add(kicker1);
+                tiebreaks.add(kicker2);
+                tiebreaks.add(kicker3);
+                break;
+            default:
+                ArrayList<Integer> AllRanks = new ArrayList<>();
+                for (Card c : cards) {
+                    int cardVal = c.getValue().ordinal();
+                    AllRanks.add(cardVal);
+                }
+
+                AllRanks.sort((a, b) -> b - a);
+
+                for(int i = 0; i < 5; i++){
+                    tiebreaks.add(AllRanks.get(i));
+                }
+                break;
+        }
+
         return new EvaluatedHand(best, 0);
 
     }
