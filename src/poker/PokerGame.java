@@ -1,5 +1,6 @@
 package poker;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /*
@@ -45,6 +46,28 @@ public class PokerGame {
             return getSmallBlindIndex();
         }
         return (this.dealerIndex + 3) % this.players.size();
+    }
+
+
+    public static HashMap<Player, Integer> splitPot(Pot pot, ArrayList<Player> winners){
+        HashMap<Player, Integer> payouts = new HashMap<>();
+        int total = pot.getPot();
+        int numOfWinners = winners.size();
+
+        int base = total / numOfWinners;
+        int leftover = total % numOfWinners;
+
+        for(int i = 0; i < winners.size(); i++){
+            Player p = winners.get(i);
+            int payout = base;
+
+            if(i < leftover){
+                payout++;
+            }
+
+            payouts.put(p, payout);
+        }
+        return payouts;
     }
 
 
@@ -137,7 +160,7 @@ public class PokerGame {
         }
 
         //removes any players who are broke
-        for(int i = players.size(); i >= 0; i--){
+        for(int i = players.size() - 1; i > 0; i--){
             Player p = players.get(i);
             if(p.getChips() == 0){
                 players.remove(p);
@@ -166,33 +189,75 @@ public class PokerGame {
 
     }
 
-public void FlopRound(){
-    for(Player p : players){
-            p.resetRoundContribution();
+    public void FlopRound(){
+        for(Player p : players){
+                p.resetRoundContribution();
+        }
+        dealer.dealFlop(this.board);
+        lastAggressorIndex = getSmallBlindIndex();
+        runBettingRound(getSmallBlindIndex());
     }
-    dealer.dealFlop(this.board);
-    lastAggressorIndex = getSmallBlindIndex();
-    runBettingRound(getSmallBlindIndex());
-}
 
-public void TurnRound(){
-    for(Player p : players){
-            p.resetRoundContribution();
+    public void TurnRound(){
+        for(Player p : players){
+                p.resetRoundContribution();
+        }
+        dealer.dealTurn(board);
+        lastAggressorIndex = getSmallBlindIndex();
+        runBettingRound(getSmallBlindIndex());
     }
-    dealer.dealTurn(board);
-    lastAggressorIndex = getSmallBlindIndex();
-    runBettingRound(getSmallBlindIndex());
-}
 
-public void RiverRound(){
-    for(Player p : players){
-            p.resetRoundContribution();
+    public void RiverRound(){
+        for(Player p : players){
+                p.resetRoundContribution();
+        }
+        dealer.dealRiver(board);
+        lastAggressorIndex = getSmallBlindIndex();
+        runBettingRound(getSmallBlindIndex());
     }
-    dealer.dealRiver(board);
-    lastAggressorIndex = getSmallBlindIndex();
-    runBettingRound(getSmallBlindIndex());
-}
 
+
+    public void determineWinner(){
+        Player winningPlayer = null;
+        EvaluatedHand winnersHand = null;
+        ArrayList<Player> tiedPlayers = new ArrayList<>();
+
+        for (Player player : players) {
+            if(winningPlayer == null){
+                winningPlayer = player;
+                winnersHand = HandEvaluator.evaluateHand(player.getHand(), board);
+                continue;
+            }
+
+            EvaluatedHand currentHand = HandEvaluator.evaluateHand(player.getHand(), board); 
+
+            if(currentHand.compareTo(winnersHand) > 0){
+                winnersHand = currentHand;
+                winningPlayer = player;
+                tiedPlayers.clear();
+            } else if(currentHand.compareTo(winnersHand) == 0){
+                if(!tiedPlayers.isEmpty()){
+                    tiedPlayers.add(player);
+                } else{
+                    tiedPlayers.add(winningPlayer);
+                    tiedPlayers.add(player);
+                }
+            }
+        }
+
+        HashMap<Player, Integer> split = null;
+        if(tiedPlayers.isEmpty()){
+            winningPlayer.addChips(pot.getPot());
+        } else{
+            split = splitPot(this.pot, tiedPlayers);
+
+            for(Player p : tiedPlayers){
+                int payout = split.get(p);
+                p.addChips(payout);
+            }
+        }
+        PlayerIO.outputWinner(winningPlayer, tiedPlayers, pot, winnersHand, split);
+    }
     public void resetGame(){
         this.pot = new Pot();
         this.dealer = new Dealer();

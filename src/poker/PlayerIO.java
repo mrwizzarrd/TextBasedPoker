@@ -1,6 +1,8 @@
 package poker;
 
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class PlayerIO {
     private static Scanner sc = new Scanner(System.in);
@@ -58,5 +60,24 @@ public class PlayerIO {
             }
         }
     }
-    
+
+    public static void outputWinner(Player winner, 
+                                    ArrayList<Player> winners, 
+                                    Pot pot, 
+                                    EvaluatedHand evaledHand,
+                                    HashMap<Player, Integer> payouts){
+        if(winners.isEmpty()){
+            System.out.printf("---------Winner----------\n");
+            System.out.printf("Winning Hand: %s\n", evaledHand.toString());
+            System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n-------------------------", winner.getName(), winner.getHand(), pot.getPot());
+        } else{
+            System.out.printf("---------Winners---------\n");
+            System.out.printf("Winning Hand: %s\n", evaledHand.toString());
+            for (Player player : winners) {
+                int payout = payouts.get(player);
+                System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n-------------------------", player.getName(), player.getHand().toString(), payout);
+            }
+
+        }
+    }
 }

@@ -26,7 +26,7 @@ public class Player {
         this.hand = hand;
     }
 
-    public Hand getHand(){
+    public PlayerHand getHand(){
         return this.hand;
     }
 
@@ -84,6 +84,9 @@ public class Player {
 
     public void addToRoundContribution(int amount){
         this.roundContribution += amount;
+        if(amount > this.chips){
+            amount = this.chips;
+        }
         this.chips -= amount;
     }
 

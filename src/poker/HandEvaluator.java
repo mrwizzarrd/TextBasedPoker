@@ -298,24 +298,24 @@ public class HandEvaluator {
                 break;
             case ONE_PAIR:
                 int pairRank = -1;
-                int kicker1 = -1;
-                int kicker2 = -1;
-                int kicker3 = -1;
+                ArrayList<Integer> kickers = new ArrayList<>();
                 for(int r = 0; r < 13; r++){
                     if(rankFreq[r] == 2){
                         pairRank = r;
-                    } else if(rankFreq[r] == 1 && r > kicker1){
-                        kicker1 = r;
-                    } else if(rankFreq[r] == 1 && r > kicker2){
-                        kicker2 = r;
-                    } else if(rankFreq[r] == 1 && r > kicker3){
-                        kicker3 = r;
+                        break;
+                    }
+                }
+                int singleCount = 0;
+                for(int r = 12; singleCount != 3; r--){
+                    if(rankFreq[r] == 1){
+                        singleCount++;
+                        kickers.add(r);
                     }
                 }
                 tiebreaks.add(pairRank);
-                tiebreaks.add(kicker1);
-                tiebreaks.add(kicker2);
-                tiebreaks.add(kicker3);
+                tiebreaks.add(kickers.get(0));
+                tiebreaks.add(kickers.get(1));
+                tiebreaks.add(kickers.get(2));
                 break;
             default:
                 ArrayList<Integer> AllRanks = new ArrayList<>();
@@ -332,7 +332,14 @@ public class HandEvaluator {
                 break;
         }
 
-        return new EvaluatedHand(best, 0);
+        int[] tie_breakers = {-256, -256, -256, -256};
+
+        for(int i = 0;i < 4 && i < tiebreaks.size(); i++){
+            int tiebreakValue = tiebreaks.get(i);
+            tie_breakers[i] = tiebreakValue;
+        }
+
+        return new EvaluatedHand(best, tie_breakers);
 
     }
 }

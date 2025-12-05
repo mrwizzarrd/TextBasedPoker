@@ -1,6 +1,6 @@
 package poker;
 
-public enum EvaluatedHand{
+public enum HandCategory{
     ROYAL_FLUSH,
     STRAIGHT_FLUSH,
     FOUR_KIND,

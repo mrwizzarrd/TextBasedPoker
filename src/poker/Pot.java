@@ -16,6 +16,7 @@ public class Pot {
         this.pot += amount;
     }
 
+
     public void resetPot(){
         this.pot = 0;
     }
