@@ -53,8 +53,7 @@ echo.
 
 REM Run main section
 
-set MAIN_CLASS=poker.Testing
-
+set MAIN_CLASS=poker.Game
 echo running %MAIN_CLASS%...
 echo ==================================
 

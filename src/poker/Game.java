@@ -2,7 +2,7 @@ package poker;
 
 import java.util.ArrayList;
 
-public class Testing {
+public class Game {
     public static void main(String[] args) {
         int gameStatus = GameIO.initScreen();
 
