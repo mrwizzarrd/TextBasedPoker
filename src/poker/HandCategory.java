@@ -1,14 +1,14 @@
 package poker;
 
 public enum HandCategory{
-    ROYAL_FLUSH,
-    STRAIGHT_FLUSH,
-    FOUR_KIND,
-    FULL_HOUSE,
-    FLUSH,
-    STRAIGHT,
-    THREE_KIND,
-    TWO_PAIR,
+    HIGH,
     ONE_PAIR,
-    HIGH
+    TWO_PAIR,
+    THREE_KIND,
+    STRAIGHT,
+    FLUSH,
+    FULL_HOUSE,
+    FOUR_KIND,
+    STRAIGHT_FLUSH,
+    ROYAL_FLUSH
 }

@@ -207,13 +207,13 @@ public class HandEvaluator {
             possibleCategories.remove(HandCategory.ONE_PAIR);
         }
 
-        for(HandCategory cat : HandCategory.values()){
-            if(possibleCategories.contains(cat)){
-                best = cat;
+        HandCategory[] cats = HandCategory.values();
+        for(int i = cats.length - 1; i >=0; i--) {
+            if (possibleCategories.contains(cats[i])) {
+                best = cats[i];
                 break;
             }
         }
-
         //handle tie scenarios
 
         ArrayList<Integer> tiebreaks = new ArrayList<>();

@@ -10,6 +10,9 @@ public class GameIO {
 
     private static Scanner sc = new Scanner(System.in);
 
+    private static String ShortBar = "=============================";
+    private static String LongBar = "==========================================================";
+
     //=============================================================================
     //=========================Helpers=============================================
     //=============================================================================
@@ -27,7 +30,7 @@ public class GameIO {
     }
 
     private static void bar(){
-        System.out.println("=============================");
+        System.out.println(ShortBar);
     }
 
     public static void pressAnyKeyToContinue() {
@@ -82,10 +85,11 @@ public class GameIO {
         ArrayList<Player> players = new ArrayList<>();
 
         int playerAmount = 0;
+        int botCount = 0;
         while (true) {
             try{
                 playerAmount = Integer.parseInt(promptInput("How many players would you like in this game?"));
-                if(playerAmount != -256 && playerAmount < 2){
+                if(playerAmount != -256 && playerAmount < 2){ //-256 is debug mode
                     System.out.println("Not Enough Players");
                     continue;
                 }
@@ -102,11 +106,13 @@ public class GameIO {
             }
         }
         if(playerAmount == -256){ //DEBUG MODE I'M TIRED OF MANUALLY ADDING EACH PLAYER
-            System.out.println("++++++++++++++++++++++++++++++++++DEBUG MODE ENTERED++++++++++++++++++++++++++++++");
+            System.out.println("++++++++++++++++++++++++++++++++++DEBUG MODE ENTERED++++++++++++++++++++++++++++++++++++++");
             players.add(new Player("Roland", 10000));
-            players.add(new Player("Stanley", 10000));
-            players.add(new Player("Eli", 10000));
-            players.add(new Player("Max", 10000));
+            players.add(new BotPlayer(2500, 25));
+            players.add(new BotPlayer(2500, 45));
+            players.add(new BotPlayer(2500, 25));
+            players.add(new BotPlayer(2500, 55));
+            return players;
         }
         for(int i = 0; i < playerAmount; i++){
             while (true) {
@@ -115,21 +121,66 @@ public class GameIO {
                 String name;
                 int chips;
 
-                name = promptInput("Enter Player Name");
-                try{
-                    chips = Integer.parseInt(promptInput("Starting Chips"));
-                } catch(NumberFormatException e){
-                    System.out.println("Error: Input value must be an integer, try again");
-                    continue;
-                }
+                //---Logic to Check if Player Being Added is A Bot---
+                String bot = promptInput("Is This Player A Bot? [Y/N] (Any other input will be taken as N)").toLowerCase();
+                if(bot.equals("y")){
+                    int aggressionLevel = 0;
+                    try{
+                        chips = Integer.parseInt(promptInput("Enter Starting Chips"));
+                    } catch (NumberFormatException e){
+                        System.out.println("Error: Input value must be an integer, try again");
+                        continue;
+                    }
+                    try{
+                        aggressionLevel = Integer.parseInt(promptInput("Enter Aggression Level For Bot Player"));
+                    } catch (NumberFormatException e){
+                        System.out.println("Error: Input value must be an integer, try again");
+                        continue;
+                    }
 
-                String conf;
+                    if (chips <= 0) {
+                        System.out.println("Error: Chips must be positive");
+                        continue;
+                    }
 
-                System.out.printf("    Name: %s\n    Starting Chips: %d\n\nIs This Correct [Y/N] (Any other input will be taken as N)\n", name, chips);
-                conf = promptInput("");
-                if( conf.equals("Y")||  conf.equals("y")){
-                    players.add(new Player(name, chips));
-                    break;
+                    if (aggressionLevel < 0 || aggressionLevel > 60) {
+                        System.out.println("Error: Aggression must be between 0 and 60");
+                        continue;
+                    }
+                    Player botPlayer = new BotPlayer(chips, aggressionLevel);
+
+                    String conf;
+
+                    System.out.printf("    Name: %s\n    Starting Chips: %d\n    Aggression Level: %d\nIs This Correct [Y/N] (Any other input will be taken as N)\n", botPlayer.getName(), chips, aggressionLevel);
+                    conf = promptInput("");
+                    if (conf.equals("Y") || conf.equals("y")) {
+                        players.add(botPlayer);
+                        break;
+                    }
+
+
+                } //-----------------Human Player Logic----------------------
+                else {
+                    name = promptInput("Enter Human Player Name");
+                    try {
+                        chips = Integer.parseInt(promptInput("Starting Chips"));
+                        if(chips <= 0){
+                            System.out.println("Error: Chip Amount Must Be Greater Than Zero");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: Input value must be an integer, try again");
+                        continue;
+                    }
+
+
+                    String conf;
+
+                    System.out.printf("    Name: %s\n    Starting Chips: %d\n\nIs This Correct [Y/N] (Any other input will be taken as N)\n", name, chips);
+                    conf = promptInput("");
+                    if (conf.equals("Y") || conf.equals("y")) {
+                        players.add(new Player(name, chips));
+                        break;
+                    }
                 }
             }
         }
@@ -163,7 +214,8 @@ public class GameIO {
                                          String round,
                                          int DealerIndex,
                                          int bb,
-                                         int sb){
+                                         int sb,
+                                         PokerGame game){
 
         clearScreen();
 
@@ -175,6 +227,33 @@ public class GameIO {
         bar();
         System.out.println("===== Table =====");
         for(Player tp : players){
+            Action lastAction = null;
+            for(Action a : game.getActionLog().getRecentActions()){
+                if(a.getActor() == tp){
+                    lastAction = a;
+                    break;
+                }
+            }
+
+            String actionTag = "Last Action: N/A";
+            if(lastAction != null) {
+                switch (lastAction.getAction()) {
+                    case PlayerAction.CALL:
+                        actionTag = "Last Action: Call";
+                        break;
+                    case PlayerAction.FOLD:
+                        actionTag = "Last Action: Fold";
+                        break;
+                    case PlayerAction.CHECK:
+                        actionTag = "Last Action: Check";
+                        break;
+                    case PlayerAction.RAISE:
+                        actionTag = "Last Action: Raise (" + lastAction.getBetAmount() + ")";
+                        break;
+                    default:
+                        break;
+                }
+            }
             String currentTurn = tp == p ? "->" : "";
             String otherTag = "";
             if(players.indexOf(tp) == DealerIndex){
@@ -191,12 +270,13 @@ public class GameIO {
                     otherTag = "(Big Blind)";
                 }
             }
-            System.out.printf("%s%s%s | Chips: %d | Bet: %d |%s%s\n",
+            System.out.printf("%s%s%s | Chips: %d | Bet: %d | %s | %s%s\n",
                     currentTurn,
                     otherTag,
                     tp.getName(),
                     tp.getChips(),
                     tp.getRoundContribution(),
+                    actionTag,
                     tp.hasFolded() ? " (FOLDED)" : "",
                     tp.getChips() == 0 && !tp.hasFolded() ? " (ALL-IN)" : "");
         }
@@ -211,13 +291,13 @@ public class GameIO {
         if(winners.isEmpty()){
             System.out.printf("---------Winner----------\n");
             System.out.printf("Winning Hand: %s\n", evaledHand.toString());
-            System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n-------------------------", winner.getName(), winner.getHand(), pot.getPot());
+            System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n%s\n", winner.getName(), winner.getHand(), pot.getPot(), ShortBar);
         } else{
             System.out.printf("---------Winners---------\n");
             System.out.printf("Winning Hand: %s\n", evaledHand.toString());
             for (Player player : winners) {
                 int payout = payouts.get(player);
-                System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n-------------------------", player.getName(), player.getHand().toString(), payout);
+                System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n%s\n", player.getName(), player.getHand().toString(), payout, ShortBar);
             }
         }
     }
@@ -225,6 +305,9 @@ public class GameIO {
     public static void outputAllHands(ArrayList<Player> players, CommunityHand board){
         System.out.println("------------------All Hands-------------------");
         for(Player p : players){
+            if(p.hasFolded()){
+                continue;
+            }
             EvaluatedHand hd = HandEvaluator.evaluateHand(p.getHand(), board);
             System.out.printf("  %s\n    [%s] [%s]\n", p.getName(), p.getHand().toString(), hd.toString());
         }
@@ -246,16 +329,21 @@ public class GameIO {
         if (winners.isEmpty()) {
             System.out.printf("---Winner----\n");
             System.out.printf("Winning Hand: %s\n", evaledHand.toString());
-            System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n-------------------------", winner.getName(), winner.getHand(), sp.getAmount());
+            System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n%s\n", winner.getName(), winner.getHand(), sp.getAmount());
         } else {
             System.out.printf("---Winners---\n");
             System.out.printf("Winning Hand: %s\n", evaledHand.toString());
             for (Player player : winners) {
                 int payout = payouts.get(player);
-                System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n-------------------------", player.getName(), player.getHand().toString(), payout);
+                System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n%s\n", player.getName(), player.getHand().toString(), payout, ShortBar);
             }
             bar();
         }
+    }
+
+    public static void outputFoldedWinner(Player p, int chips){
+        System.out.printf("---Winner by Fold----\n");
+        System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n%s", p.getName(), p.getHand(), chips, ShortBar);
     }
 
     public static boolean playAgain(){

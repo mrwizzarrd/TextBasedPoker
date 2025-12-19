@@ -15,6 +15,7 @@ public class PokerGame {
     //================Class Properties And Constructor=============================
     //=============================================================================
     private Pot pot;
+    private ActionLog actionLog;
     private Dealer dealer;
     private final ArrayList<Player> players;
     private CommunityHand board;
@@ -23,12 +24,16 @@ public class PokerGame {
     private String currentRound;
     private int sbPosition;
     private int bbPosition;
+    private Player currentPlayer;
+    private int lastRaiseSize = 0;
+
 
     public PokerGame(ArrayList<Player> players){
         this.pot = new Pot();
         this.dealer = new Dealer();
         this.players = new ArrayList<>(players);
         this.board = new CommunityHand();
+        this.actionLog = new ActionLog();
     }
 
     /* in poker, the dealer rotates every round
@@ -44,6 +49,7 @@ public class PokerGame {
     public CommunityHand getBoard(){
         return this.board;
     }
+    public Player getCurrentPlayer() { return this.currentPlayer; }
 
     //=============================================================================
     //=========================Helpers=============================================
@@ -93,6 +99,14 @@ public class PokerGame {
     private int getNextActivePlayer(int startIndex) {
         int index = startIndex;
         while (players.get(index).hasFolded()) {
+            index = (index + 1) % players.size();
+        }
+        return index;
+    }
+
+    private int getNextActiveHumanPlayer(int startIndex) {
+        int index = startIndex;
+        while (players.get(index).hasFolded() || players.get(index).isBot()) {
             index = (index + 1) % players.size();
         }
         return index;
@@ -151,8 +165,6 @@ public class PokerGame {
     }
 
 
-
-
     private int getHighestBet(){
         int max = 0;
         for(Player p : players){
@@ -161,6 +173,10 @@ public class PokerGame {
             }
         }
         return max;
+    }
+
+    public ActionLog getActionLog() {
+        return actionLog;
     }
 
     //betting round stopping condition #1
@@ -189,6 +205,20 @@ public class PokerGame {
         int nextActive = (currentIndex + 1) % players.size();
         nextActive = getNextActivePlayer(nextActive);
         return nextActive == startingPlayerIndex;
+    }
+
+    private boolean bettingClosedByAllIn(){
+        int playersCanAct = 0;
+        for(Player p : players){
+            if(p.hasFolded() || p.getChips() == 0){
+                continue;
+            }
+            playersCanAct++;
+        }
+        if(playersCanAct < 2){
+            return true;
+        }
+        return false;
     }
 
 
@@ -236,62 +266,98 @@ public class PokerGame {
     }
 
 
-    //=============Betting Round Method for Game==============
+    //=============Betting Round Met hod for Game==============
     public void runBettingRound(int startingPlayerIndex){
-
+        this.lastRaiseSize = 2;
+        int betAmount = 0;
         int currentIndex = startingPlayerIndex;
 
-        while(true){
+        while(true) {
             PlayerAction bettingAction;
             Player p = players.get(currentIndex);
-            if(p.hasFolded() || p.getChips() == 0){
+            this.currentPlayer = p;
+            if (p.hasFolded() || p.getChips() == 0) {
 
-                if(endOfRound(currentIndex, startingPlayerIndex)){
+                if (endOfRound(currentIndex, startingPlayerIndex) || bettingClosedByAllIn()) {
                     break;
                 }
                 currentIndex = (currentIndex + 1) % players.size();
                 continue;
             }
-
-            GameIO.displayPlayerTurn(p, this.players, this.board, this.pot, this.currentRound, this.dealerIndex, this.bbPosition, this.sbPosition);
-            bettingAction = PlayerIO.getPlayerAction(p, (p.getRoundContribution() == getHighestBet()));
+            boolean validBet = false;
+            while(!validBet){
+            GameIO.displayPlayerTurn(p, this.players, this.board, this.pot, this.currentRound, this.dealerIndex, this.bbPosition, this.sbPosition, this);
+            bettingAction = p.getPlayerAction((p.getRoundContribution() == getHighestBet()), this.board);
 
             switch (bettingAction) {
+                case CHECK:
+                    validBet = true;
+                    break;
                 case CALL:
-                    int need = getHighestBet() -p.getRoundContribution();
+                    int need = getHighestBet() - p.getRoundContribution();
                     p.addToRoundContribution(need);
                     this.pot.addToPot(need);
+                    validBet = true;
                     break;
                 case RAISE:
-                    int raiseAmount = PlayerIO.getBetAmount(p, getHighestBet() + 1);
-                    lastAggressorIndex = currentIndex;
+                    int previousHighestBet = getHighestBet();
+                    if (getHighestBet() + 1 > p.getChips() && !p.isBot) {
+                        System.out.println("Error: Not Enough Chips To Raise; Try Again");
+                        continue;
+                    }
+                    if(this.lastAggressorIndex == currentIndex){
+                        if(!p.isBot){
+                            System.out.println("Error: Raise Not Allowed; Try Again");
+                        }
+                        continue;
+                    }
+                    validBet = true;
+                    int minRaiseTo = getHighestBet() + lastRaiseSize;
+                    int raiseAmount = p.getRaiseAmount(minRaiseTo);
+                    if(raiseAmount == -456){
+                        continue;
+                    }
 
+                    if(this.lastRaiseSize <= raiseAmount - previousHighestBet){
+                        this.lastRaiseSize = raiseAmount - previousHighestBet;
+                        lastAggressorIndex = currentIndex;
+                    }
                     int diff = raiseAmount - p.getRoundContribution();
                     this.pot.addToPot(diff);
                     p.addToRoundContribution(diff);
+                    betAmount = diff;
                     break;
                 case FOLD:
+                    validBet = true;
                     p.fold();
-                    if(getActivePlayerCount() == 1){
+                    if (getActivePlayerCount() == 1) {
                         return;
                     }
                     break;
                 default:
                     break;
             }
+            this.actionLog.addAction(p, bettingAction, betAmount);
+        }
 
-
-            if((endOfRound(currentIndex, startingPlayerIndex))){
-                break;
+            if (getHighestBet() == 0) {
+                int next = getNextActivePlayer((currentIndex + 1) % players.size());
+                if (next == startingPlayerIndex) {
+                    break;
+                }
+            } else {
+                if (endOfRound(currentIndex, startingPlayerIndex) || bettingClosedByAllIn()) {
+                    break;
+                }
             }
-
 
             currentIndex = (currentIndex + 1) % players.size();
             currentIndex = getNextActivePlayer(currentIndex);
-            System.out.println("Next Player To Act: " + players.get(currentIndex).getName());
-            GameIO.pressAnyKeyToContinue();
-        }  
-    
+            if(!this.currentPlayer.isBot()){
+                System.out.println("Next Human Player To Act: " + this.players.get(getNextActiveHumanPlayer(currentIndex)).getName());
+                GameIO.pressAnyKeyToContinue();
+            }
+        }
     }
 
     public void PreFlop(){
@@ -325,7 +391,6 @@ public class PokerGame {
 
         this.players.get(sbPosition).addToRoundContribution(1);
         this.players.get(bbPosition).addToRoundContribution(2);
-        //TODO LATER: Handle a scenario where player doesn't have enough chips
 
         this.pot.addToPot(3);
 
@@ -392,6 +457,21 @@ public class PokerGame {
         int count = getActivePlayerCount();
         if(count == 0){
             System.err.println("ERROR: Winner Cannot Be Determined.");
+        }
+
+        if(count == 1){
+            Player winner = null;
+            for(Player p : players){
+                if(!p.hasFolded()){
+                    winner = p;
+                    break;
+                }
+            }
+
+            assert winner != null;
+            winner.addChips(pot.getPot());
+            GameIO.outputFoldedWinner(winner, pot.getPot());
+            return;
         }
         Player winningPlayer = null;
         EvaluatedHand winnersHand = null;
@@ -480,6 +560,7 @@ public class PokerGame {
                     p.addChips(payout);
                 }
             } else{
+                assert spWinner != null;
                 spWinner.addChips(sidePot.getAmount());
             }
             GameIO.outputSPWinner(spWinner, potNumber, sidePot, tiedSP, bestHand, payoutMap);
@@ -489,5 +570,6 @@ public class PokerGame {
     public void resetGame(){
         this.pot = new Pot();
         this.dealer = new Dealer();
+        this.actionLog = new ActionLog();
     }
 }

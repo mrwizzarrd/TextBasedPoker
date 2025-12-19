@@ -12,7 +12,11 @@ public class PlayerIO {
         while (true) {
             int amount;
             try{
-                amount = Integer.parseInt(sc.nextLine());
+                String input = sc.nextLine().toLowerCase();
+                if(input.equals("b") || input.equals("back")){
+                    return -456;
+                }
+                amount = Integer.parseInt(input);
             } catch(NumberFormatException e){
                 System.out.println("Invalid Input! Try Again");
                 continue;

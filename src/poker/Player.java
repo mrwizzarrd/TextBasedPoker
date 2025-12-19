@@ -2,11 +2,12 @@ package poker;
 
 public class Player {
     private PlayerHand hand;
-    private String name;
+    private final String name;
     private int chips;
     private int currentBet;
     private boolean folded;
     private int roundContribution = 0;
+    public boolean isBot = false;
 
 
     public Player(String name, int chips){
@@ -16,12 +17,7 @@ public class Player {
         this.currentBet = 0;
     }
 
-    public String getName(){
-        return this.name;
-    }
-
-
-    //methods that deal with player's hand
+    //=========Getters/Setters====================
     public void setHand(PlayerHand hand){
         this.hand = hand;
     }
@@ -30,10 +26,17 @@ public class Player {
         return this.hand;
     }
 
-    //methods that deal with player's chips
+
+    public String getName(){
+        return this.name;
+    }
 
     public int getChips(){
         return this.chips;
+    }
+
+    public void setChips(int chips){
+        this.chips = chips;
     }
 
     public void addChips(int chips){
@@ -44,20 +47,9 @@ public class Player {
         this.chips -= chips;
     }
 
-    public void setChips(int chips){
-        this.chips = chips;
-    }
-
-    //methods that deal with folding
-    public void fold(){
-        this.folded = true;
-    }
-
     public boolean hasFolded(){
         return this.folded;
     }
-
-    //methods that deal with betting
 
     public int getCurrentBet(){
         return this.currentBet;
@@ -67,12 +59,11 @@ public class Player {
         this.currentBet = betAmount;
     }
 
-    public void bet(int betAmount){
-        if(betAmount > chips) betAmount = chips; //all in bet
-
-        chips -= betAmount;
-        currentBet += betAmount;
+    public int getMaxAffordableBet(int agressionPercent){
+        return chips * (agressionPercent/100);
     }
+
+    public boolean isBot() { return this.isBot; }
 
     public int getRoundContribution(){
         return this.roundContribution;
@@ -80,6 +71,20 @@ public class Player {
 
     public void setRoundContribution(int RC){
         this.roundContribution = RC;
+    }
+
+    //========Action Methods===============
+
+    public void fold(){
+        this.folded = true;
+    }
+
+    public PlayerAction getPlayerAction(boolean canCheck, CommunityHand board){
+        return PlayerIO.getPlayerAction(this, canCheck);
+    }
+
+    public int getRaiseAmount(int minLegalRaise){
+        return PlayerIO.getBetAmount(this, minLegalRaise);
     }
 
     public void addToRoundContribution(int amount){
@@ -103,7 +108,7 @@ public class Player {
 
     @Override
     public String toString(){
-        String PlayerDetails = new String("Player Name: %name%\nHand: %hand%\nChips: %chips%");
+        String PlayerDetails = "Player Name: %name%\nHand: %hand%\nChips: %chips%";
         PlayerDetails = PlayerDetails.replace("%name%", this.name);
         PlayerDetails = PlayerDetails.replace("%hand%", this.hand.toString());
         PlayerDetails = PlayerDetails.replace("%chips%", String.valueOf(this.chips));

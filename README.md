@@ -6,5 +6,7 @@ Right now this project is dedicated to learning applications of object oriented 
 Things Learned from this Project (So far):
     Workflow Management
     Basic Data Structures/Algorithms
-    Refresher on Object Oriented Design and OOP Concepts such as Inheritence 
+    Refresher on Object Oriented Design and OOP Concepts such as Inheritence/Polymorphism
+    Clean User Interface Design
+     
     

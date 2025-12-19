@@ -1,3 +1,20 @@
 TODO: Document Code
-TODO: Put everything together (Almost Complete)
-TODO: Clean Up
+TODO: Clean Up UI
+TODO: BotPlayer needs to know what the last action was, will need another class called PlayerAction
+TODO: Action Logger
+
+
+Future Additions
+    Class Action
+
+        __Player action will hold__
+        Player
+        PlayerAction
+
+    Class ActionLog
+        a simple collection/array (linked list maybe???) of all actions whenever an action occurrs it will add to the collection
+        this will allow for a bot player to view what players are doing what and decide what to do
+
+
+    Add a confidence score to the BotPlayer
+        instead of being agressive, it's confidence score (which will be based off the cards in play and the last actions) will also have a role in deciding it's action
