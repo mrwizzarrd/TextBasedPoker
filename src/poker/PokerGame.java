@@ -98,16 +98,29 @@ public class PokerGame {
 
     private int getNextActivePlayer(int startIndex) {
         int index = startIndex;
+        int i = 0;
+        int playerAmount = players.size();
         while (players.get(index).hasFolded()) {
+            if(i >= playerAmount){
+                return -1;
+            }
             index = (index + 1) % players.size();
+            i++;
         }
         return index;
     }
 
     private int getNextActiveHumanPlayer(int startIndex) {
         int index = startIndex;
+        int i = 0;
+        int playerAmount = players.size();
+
         while (players.get(index).hasFolded() || players.get(index).isBot()) {
+            if(i >= playerAmount){
+                return -1;
+            }
             index = (index + 1) % players.size();
+            i++;
         }
         return index;
     }
@@ -330,6 +343,11 @@ public class PokerGame {
                 case FOLD:
                     validBet = true;
                     p.fold();
+
+                    if (currentIndex == lastAggressorIndex) {
+                        lastAggressorIndex = getNextActivePlayer((currentIndex - 1 + players.size()) % players.size());
+                    }
+
                     if (getActivePlayerCount() == 1) {
                         return;
                     }
@@ -353,8 +371,9 @@ public class PokerGame {
 
             currentIndex = (currentIndex + 1) % players.size();
             currentIndex = getNextActivePlayer(currentIndex);
-            if(!this.currentPlayer.isBot()){
-                System.out.println("Next Human Player To Act: " + this.players.get(getNextActiveHumanPlayer(currentIndex)).getName());
+            int nextHumanPlayerIndex = getNextActiveHumanPlayer(currentIndex);
+            if(nextHumanPlayerIndex != -1 || !p.isBot()){
+                System.out.println("Next Human Player To Act: " + players.get(nextHumanPlayerIndex).getName());
                 GameIO.pressAnyKeyToContinue();
             }
         }
@@ -397,7 +416,7 @@ public class PokerGame {
         dealer.dealHands(players);
 
         int startingPlayer = getFTAIndex();
-        lastAggressorIndex = startingPlayer;
+        lastAggressorIndex = bbPosition;
 
         runBettingRound(startingPlayer);
 

@@ -329,7 +329,7 @@ public class GameIO {
         if (winners.isEmpty()) {
             System.out.printf("---Winner----\n");
             System.out.printf("Winning Hand: %s\n", evaledHand.toString());
-            System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n%s\n", winner.getName(), winner.getHand(), sp.getAmount());
+            System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n", winner.getName(), winner.getHand(), sp.getAmount());
         } else {
             System.out.printf("---Winners---\n");
             System.out.printf("Winning Hand: %s\n", evaledHand.toString());
