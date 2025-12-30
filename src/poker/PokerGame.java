@@ -300,7 +300,7 @@ public class PokerGame {
             boolean validBet = false;
             while(!validBet){
             GameIO.displayPlayerTurn(p, this.players, this.board, this.pot, this.currentRound, this.dealerIndex, this.bbPosition, this.sbPosition, this);
-            bettingAction = p.getPlayerAction((p.getRoundContribution() == getHighestBet()), this.board);
+            bettingAction = p.getPlayerAction((p.getRoundContribution() == getHighestBet()), this);
 
             switch (bettingAction) {
                 case CHECK:
@@ -372,7 +372,7 @@ public class PokerGame {
             currentIndex = (currentIndex + 1) % players.size();
             currentIndex = getNextActivePlayer(currentIndex);
             int nextHumanPlayerIndex = getNextActiveHumanPlayer(currentIndex);
-            if(nextHumanPlayerIndex != -1 || !p.isBot()){
+            if(nextHumanPlayerIndex != -1 && !p.isBot()){
                 System.out.println("Next Human Player To Act: " + players.get(nextHumanPlayerIndex).getName());
                 GameIO.pressAnyKeyToContinue();
             }
@@ -590,5 +590,9 @@ public class PokerGame {
         this.pot = new Pot();
         this.dealer = new Dealer();
         this.actionLog = new ActionLog();
+
+        for(Player p : players){
+            p.resetPlayer();
+        }
     }
 }

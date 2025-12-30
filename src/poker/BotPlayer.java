@@ -4,24 +4,35 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import java.lang.Math;
+
 public class BotPlayer extends Player{
 
     private final int aggression; /*will be scaled as follows:
                                              0: always fold
-                                             0 < x <= 15: not very aggressive (Low)
-                                             15 < x <= 30: somewhat aggressive (Med)
-                                             30 < x <= 45: Very Aggressive (High)
-                                             45 < x <= 60: Most Aggressive (Extreme)*/
+                                             0 < x <= 3: not very aggressive (Low)
+                                             3 < x <= 6: somewhat aggressive (Med)
+                                             6 < x <= 8: Very Aggressive (High)
+                                             8 < x <= 10: Most Aggressive (Extreme)*/
 
-    private float handStrength = (float) 1.0;
+    private float handStrength = 1.0f; //affects confidence
+
+    private float confidence = 1.0f; /* scaled as follows:
+                                        0: always fold
+                                        .1-5.0: Low Confidence
+                                        5.1-10.0: Medium Confidence
+                                        10.1-15.0: High confidence*/
+
 
     //----------Helper Funcs---------------
-    private float calculateAggressionPercentage(){
-        return Math.min(((100.0f * this.aggression)/60.0f) * this.handStrength, 100.0f);
+    private float calculateDecisionPercent(){
+        float normConf = Math.clamp(confidence / 15f, 0f, 1f);
+        float normAggro = Math.clamp(this.aggression / 10f, 0f, 1f);
+        return (float) Math.min(100f, 100 *(.70*(normConf) + .30*(normAggro)));
     }
 
     private int randomSubtractor(int min){
-        int inverseAggression = 100 - (int) this.calculateAggressionPercentage();
+        int inverseAggression = 100 - (int) this.calculateDecisionPercent();
 
         return (int) (Math.random() * (min * inverseAggression) / 100);
     }
@@ -118,11 +129,39 @@ public class BotPlayer extends Player{
         this.handStrength = handStrength;
     }
 
+    private void calculateConfidence(ActionLog al, PokerGame game){
+        evaluateHand(this.getHand(), game.getBoard());
+        float conf = 7.5f + this.handStrength;
+        List<Action> lastActions = al.getRecentActions();
+
+        for(Action a : lastActions){
+            switch (a.getAction()){
+                case PlayerAction.FOLD:
+                    conf += aggression / 3f;
+                    break;
+                case PlayerAction.RAISE:
+                    if(a.getBetAmount() > this.getChips() / aggression){
+                        conf -= 2.75;
+                    } else{
+                        conf -= 4.75;
+                    }
+                    break;
+                default:
+                    if(this.handStrength < .8f){
+                        conf += .4f;
+                    } else{
+                        conf -= .4f;
+                    }
+            }
+        }
+        this.confidence = Math.clamp(conf, 0f, 15f);
+    }
+
     @Override
-    public PlayerAction getPlayerAction(boolean canCheck, CommunityHand board){
+    public PlayerAction getPlayerAction(boolean canCheck, PokerGame game){
         int roll = (int) (Math.random() * 100);
-        evaluateHand(this.getHand(), board);
-        float aggressionPercent = calculateAggressionPercentage();
+
+        float decisionPercent = calculateDecisionPercent();
 
         PlayerAction callCheck = canCheck ? PlayerAction.CHECK : PlayerAction.CALL;
 
@@ -132,23 +171,23 @@ public class BotPlayer extends Player{
         }
 
         //Low Aggression
-        if(aggression <= 15){
-            return roll > aggressionPercent ? PlayerAction.FOLD : callCheck;
+        if(aggression <= 3){
+            return roll > decisionPercent ? PlayerAction.FOLD : callCheck;
         }
 
         //Medium Aggression
-        if(aggression <= 30){
-            return roll < aggressionPercent ? callCheck : PlayerAction.FOLD;
+        if(aggression <= 6){
+            return roll < decisionPercent ? callCheck : PlayerAction.FOLD;
         }
 
         //High Aggression
-        if(aggression <= 45){
-            return roll < aggressionPercent  ? PlayerAction.RAISE : callCheck;
+        if(aggression <= 8){
+            return roll < decisionPercent  ? PlayerAction.RAISE : callCheck;
         }
 
         //Extreme Aggression
-        if(aggression <= 60){
-            return roll < aggressionPercent ? PlayerAction.RAISE : callCheck;
+        if(aggression <= 10){
+            return roll < decisionPercent ? PlayerAction.RAISE : callCheck;
         }
 
         return PlayerAction.FOLD;

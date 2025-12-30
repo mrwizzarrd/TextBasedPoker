@@ -79,7 +79,7 @@ public class Player {
         this.folded = true;
     }
 
-    public PlayerAction getPlayerAction(boolean canCheck, CommunityHand board){
+    public PlayerAction getPlayerAction(boolean canCheck, PokerGame game){
         return PlayerIO.getPlayerAction(this, canCheck);
     }
 

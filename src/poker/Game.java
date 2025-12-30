@@ -26,6 +26,8 @@ public class Game {
 
                 if (!GameIO.playAgain()) {
                     break;
+                } else{
+                    game.resetGame();
                 }
             }
         }

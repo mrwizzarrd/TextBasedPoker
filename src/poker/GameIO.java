@@ -108,10 +108,10 @@ public class GameIO {
         if(playerAmount == -256){ //DEBUG MODE I'M TIRED OF MANUALLY ADDING EACH PLAYER
             System.out.println("++++++++++++++++++++++++++++++++++DEBUG MODE ENTERED++++++++++++++++++++++++++++++++++++++");
             players.add(new Player("Roland", 10000));
-            players.add(new BotPlayer(2500, 25));
-            players.add(new BotPlayer(2500, 45));
-            players.add(new BotPlayer(2500, 25));
-            players.add(new BotPlayer(2500, 55));
+            players.add(new BotPlayer(2500, 2));
+            players.add(new BotPlayer(2500, 8));
+            players.add(new BotPlayer(2500, 4));
+            players.add(new BotPlayer(2500, 10));
             return players;
         }
         for(int i = 0; i < playerAmount; i++){
