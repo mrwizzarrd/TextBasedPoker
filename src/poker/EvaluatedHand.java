@@ -2,8 +2,8 @@ package poker;
 
 public class EvaluatedHand implements Comparable<EvaluatedHand> {
 
-    private HandCategory category;
-    private int[] tie_breakers;
+    private final HandCategory category;
+    private final int[] tie_breakers;
 
     public EvaluatedHand(HandCategory cat, int... tie_br){
         this.category = cat;
@@ -39,7 +39,6 @@ public class EvaluatedHand implements Comparable<EvaluatedHand> {
     @Override
 
     public String toString(){
-        String handString = this.category.toString();
-        return handString;
+        return this.category.toString().replace("_", " ");
     }
 }

@@ -33,9 +33,29 @@ public class GameIO {
         System.out.println(ShortBar);
     }
 
+    private static void divider(){
+        System.out.print("======================================================\n");
+    }
+
+
     public static void pressAnyKeyToContinue() {
         System.out.println("[Press Enter To Continue...]");
         sc.nextLine();
+    }
+
+    public static String center(String text, int width){
+        if(text == null){
+            return " ".repeat(width);
+        }
+        if(text.length() >= width){
+            return text;
+        }
+        int padding = width - text.length();
+        int left = padding / 2;
+        int right = padding - left;
+
+        return " ".repeat(left) + text + " ".repeat(right);
+
     }
 
 
@@ -52,14 +72,13 @@ public class GameIO {
      * 1- Start Game
      * 0- Exit Game
      **/
-    public static int initScreen(){
+    public static int initScreen(String vers){
         clearScreen();
-        System.out.println("================Welcome To Poker====================");
+        System.out.println("♥♦♠♣================Welcome To Poker====================♥♦♠♣ (vers " + vers +")");
         int statusCode = -256;
         while (true) {
-            System.out.println("    ======Options======");
-            System.out.println("    A: Start Game");
-            System.out.println("    B: Quit");
+            System.out.println("                    A: Start Game");
+            System.out.println("                    B: Quit");
             System.out.print(">");
 
             String input = sc.nextLine();
@@ -85,7 +104,6 @@ public class GameIO {
         ArrayList<Player> players = new ArrayList<>();
 
         int playerAmount = 0;
-        int botCount = 0;
         while (true) {
             try{
                 playerAmount = Integer.parseInt(promptInput("How many players would you like in this game?"));
@@ -186,25 +204,78 @@ public class GameIO {
         }
         return players;
     }
-    
-    public static void displayBoard(CommunityHand board, Pot pot, String round){
-        clearScreen();
-        System.out.println("========== CURRENT  BOARD ==========");
-        bar();
-        System.out.printf("Round: %s\nChips in Pot: %d\n", round, pot.getPot());
-        bar();
 
-        System.out.println("Cards:");
+    public static void displayTable(ArrayList<Player> players,
+                                    int DealerIndex,
+                                    int bb,
+                                    int sb,
+                                    PokerGame game,
+                                    Player p
+                                    ){
+        System.out.printf("%s%s%s%n%n", "==================== ", center("TABLE", 12), " ====================");
+        for(Player tp : players){
+            Action lastAction = null;
+            for(Action a : game.getActionLog().getRecentActions()){
+                if(a.getActor() == tp){
+                    lastAction = a;
+                    break;
+                }
+            }
+
+            String actionTag = "-";
+            if(lastAction != null) {
+               if(lastAction.getBetAmount() != 0){
+                   actionTag = String.valueOf(lastAction.getBetAmount());
+               } else if (lastAction.getAction() == PlayerAction.FOLD || tp.hasFolded()) {
+                   actionTag = "(FOLDED)";
+               } else {
+                   actionTag = "C";
+               }
+            }
+            String currentTurn = tp == p ? "-> " : "";
+            String otherTag = "";
+            if(players.indexOf(tp) == DealerIndex){
+                otherTag = "(Dealer)";
+            }
+            if(players.size() != 2){
+                if(players.indexOf(tp) == sb){
+                    otherTag = "(Small Blind)";
+                } else if (players.indexOf(tp) == bb) {
+                    otherTag = "(Big Blind)";
+                }
+            } else{
+                if(players.indexOf(tp) != DealerIndex){
+                    otherTag = "(Big Blind)";
+                }
+            }
+
+            String nameTag = currentTurn + otherTag + tp.getName();
+            System.out.printf("%-40s%-10d%s%s\n",
+                    nameTag,
+                    tp.getChips(),
+                    actionTag,
+                    tp.getChips() == 0 && !tp.hasFolded() ? " (ALL-IN)" : "");
+        }
+
+        divider();
+    }
+    public static void displayBoard(CommunityHand board, Pot pot, String round, Player p){
+        clearScreen();
+        System.out.printf("%s%s%s%n%n", "==================== ", center(round.toUpperCase(), 12), " ====================");
+        System.out.printf("Pot: %d | ", pot.getPot());
+
+        System.out.print("Board: ");
         if(board.cards.isEmpty()){
-            System.out.println("[No Cards]");
+            System.out.print("----");
         }else{
-            System.out.println();
             for (Card c : board.cards) {
                 System.out.printf("[%s] ", c.toString());
             }
-            System.out.println();
+            System.out.println("\n");
         }
-        bar();
+
+
+        System.out.printf("\nYour Hand: %s \n", p.getHand().toString());
     }
 
     public static void displayPlayerTurn(Player p,
@@ -218,76 +289,15 @@ public class GameIO {
                                          PokerGame game){
 
         clearScreen();
-
-        displayBoard(board, pot, round);
-
-        System.out.println("======= PLAYER TURN =======");
-        System.out.printf("Player: %s\n", p.getName());
-        System.out.printf("Hand: %s\n", p.getHand().toString());
-        bar();
-        System.out.println("===== Table =====");
-        for(Player tp : players){
-            Action lastAction = null;
-            for(Action a : game.getActionLog().getRecentActions()){
-                if(a.getActor() == tp){
-                    lastAction = a;
-                    break;
-                }
-            }
-
-            String actionTag = "Last Action: N/A";
-            if(lastAction != null) {
-                switch (lastAction.getAction()) {
-                    case PlayerAction.CALL:
-                        actionTag = "Last Action: Call";
-                        break;
-                    case PlayerAction.FOLD:
-                        actionTag = "Last Action: Fold";
-                        break;
-                    case PlayerAction.CHECK:
-                        actionTag = "Last Action: Check";
-                        break;
-                    case PlayerAction.RAISE:
-                        actionTag = "Last Action: Raise (" + lastAction.getBetAmount() + ")";
-                        break;
-                    default:
-                        break;
-                }
-            }
-            String currentTurn = tp == p ? "->" : "";
-            String otherTag = "";
-            if(players.indexOf(tp) == DealerIndex){
-                otherTag = "(Dealer)";
-            }
-            if(round.equals("Pre Flop") && players.size() != 2){
-                if(players.indexOf(tp) == sb){
-                    otherTag = "(Small Blind)";
-                } else if (players.indexOf(tp) == bb) {
-                    otherTag = "(Big Blind)";
-                }
-            } else if(round.equals("Pre Flop") && players.size() == 2){
-                if(players.indexOf(tp) != DealerIndex){
-                    otherTag = "(Big Blind)";
-                }
-            }
-            System.out.printf("%s%s%s | Chips: %d | Bet: %d | %s | %s%s\n",
-                    currentTurn,
-                    otherTag,
-                    tp.getName(),
-                    tp.getChips(),
-                    tp.getRoundContribution(),
-                    actionTag,
-                    tp.hasFolded() ? " (FOLDED)" : "",
-                    tp.getChips() == 0 && !tp.hasFolded() ? " (ALL-IN)" : "");
-        }
-
-        bar();
+        displayBoard(board, pot, round, p);
+        displayTable(players, DealerIndex, bb, sb, game, p);
     }
     public static void outputWinner(Player winner,
                                     ArrayList<Player> winners,
                                     Pot pot,
                                     EvaluatedHand evaledHand,
                                     HashMap<Player, Integer> payouts){
+        clearScreen();
         if(winners.isEmpty()){
             System.out.printf("---------Winner----------\n");
             System.out.printf("Winning Hand: %s\n", evaledHand.toString());
@@ -303,13 +313,11 @@ public class GameIO {
     }
 
     public static void outputAllHands(ArrayList<Player> players, CommunityHand board){
-        System.out.println("------------------All Hands-------------------");
+        System.out.println("====================All Hands====================");
         for(Player p : players){
-            if(p.hasFolded()){
-                continue;
-            }
             EvaluatedHand hd = HandEvaluator.evaluateHand(p.getHand(), board);
-            System.out.printf("  %s\n    [%s] [%s]\n", p.getName(), p.getHand().toString(), hd.toString());
+            String handType = "(" + hd + ")";
+            System.out.printf("%-25s%-10s%s%-20s\n", p.getName(), p.getHand().toString(), "   ", handType);
         }
     }
 
@@ -320,30 +328,29 @@ public class GameIO {
                                       ArrayList<Player> winners,
                                       EvaluatedHand evaledHand,
                                       HashMap<Player, Integer> payouts) {
-        System.out.printf("----------Side Pot #%d----------\n", sidePotNum);
+        System.out.printf("========= Side Pot #%d =========\n", sidePotNum);
         System.out.printf("    Amount: %d chips\n", sp.getAmount());
         System.out.printf("    Involved Players:\n");
         for (Player p : sp.getEligiblePlayers()) {
             System.out.printf("        -%s\n", p.getName());
         }
         if (winners.isEmpty()) {
-            System.out.printf("---Winner----\n");
-            System.out.printf("Winning Hand: %s\n", evaledHand.toString());
-            System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n", winner.getName(), winner.getHand(), sp.getAmount());
+            System.out.printf("    ----Winner----\n");
+            System.out.printf("        Winning Hand: %s\n", evaledHand.toString());
+            System.out.printf("        Player: %s\n        Hand: %s\n        Chips Won: %s\n", winner.getName(), winner.getHand(), sp.getAmount());
         } else {
-            System.out.printf("---Winners---\n");
-            System.out.printf("Winning Hand: %s\n", evaledHand.toString());
+            System.out.printf("    ----Winners----\n");
+            System.out.printf("        Winning Hand: %s\n", evaledHand.toString());
             for (Player player : winners) {
                 int payout = payouts.get(player);
-                System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n%s\n", player.getName(), player.getHand().toString(), payout, ShortBar);
+                System.out.printf("        Player: %s\n        Hand: %s\n        Chips Won: %d\n        %s\n", player.getName(), player.getHand().toString(), payout, ShortBar);
             }
-            bar();
         }
     }
 
     public static void outputFoldedWinner(Player p, int chips){
-        System.out.printf("---Winner by Fold----\n");
-        System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n%s", p.getName(), p.getHand(), chips, ShortBar);
+        System.out.printf("========Winner by Fold========\n");
+        System.out.printf("Player: %s\nHand: %s\nChips Won: %s\n", p.getName(), p.getHand(), chips);
     }
 
     public static boolean playAgain(){

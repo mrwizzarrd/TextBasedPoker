@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public abstract class Hand {
 
-    protected ArrayList<Card> cards = new ArrayList<Card>();
+    protected ArrayList<Card> cards = new ArrayList<>();
 
     public void addCard(Card c){
         cards.add(c);

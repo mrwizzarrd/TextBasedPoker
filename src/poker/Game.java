@@ -3,10 +3,11 @@ package poker;
 import java.util.ArrayList;
 
 public class Game {
+    private static String version = "1.0.6";
     public static void main(String[] args) {
 
         while (true) {
-            int gameStatus = GameIO.initScreen();
+            int gameStatus = GameIO.initScreen(version);
 
             if (gameStatus == 0) {
                 return;

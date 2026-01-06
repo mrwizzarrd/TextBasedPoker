@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 /*
 The Dealer Class Handles anything to do with the movement of cards
-dealing hands to players during pre flop, and dealing the Flop, Turn, and River
+dealing hands to players during pre-flop, and dealing the Flop, Turn, and River
  */
 
 public class Dealer {

@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * The Pot is what holds the chips currently in play for the game
+ * It contains the mainPot as well as an ArrayList of side pots
+ **/
+
 public class Pot {
 
     private int mainPot;
@@ -22,10 +27,6 @@ public class Pot {
         this.mainPot += amount;
     }
 
-
-    public void resetPot(){
-        this.mainPot = 0;
-    }
 
     public List<SidePot> getSidePots() {
         return Collections.unmodifiableList(this.sidePots);

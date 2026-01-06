@@ -9,4 +9,4 @@ package poker;
     SPADES,
     DIAMONDS,
     CLUBS
- };
+ }

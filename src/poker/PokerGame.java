@@ -49,7 +49,7 @@ public class PokerGame {
     public CommunityHand getBoard(){
         return this.board;
     }
-    public Player getCurrentPlayer() { return this.currentPlayer; }
+    public Player getCurrentPlayer() { return this.currentPlayer; } //unused currently, may be good to have around for UI stuff later
 
     //=============================================================================
     //=========================Helpers=============================================
@@ -228,10 +228,7 @@ public class PokerGame {
             }
             playersCanAct++;
         }
-        if(playersCanAct < 2){
-            return true;
-        }
-        return false;
+        return playersCanAct < 2;
     }
 
 
@@ -280,6 +277,16 @@ public class PokerGame {
 
 
     //=============Betting Round Met hod for Game==============
+
+    /**
+     *
+     * @param startingPlayerIndex the index of the starting player for the round
+     * @brief I should have documented this a long time ago as this is the main part of the engine
+     * while there is an active bet and players haven't matched:
+     *  we first get the action of the current player and determine if it is allowed (for example if they raise, we have to make sure they're allowed to raise)
+     *  then we act on their betting action and update the ActionLog
+     *
+     */
     public void runBettingRound(int startingPlayerIndex){
         this.lastRaiseSize = 2;
         int betAmount = 0;
@@ -379,6 +386,11 @@ public class PokerGame {
         }
     }
 
+    /**
+     * This round is the first round, handles the Big Blind, Small Blind etc.
+     * Checks for players who have zero chips and boots them
+     *
+     **/
     public void PreFlop(){
         if(getActivePlayerCount() == 1){
             return;
@@ -422,6 +434,9 @@ public class PokerGame {
 
     }
 
+    /**
+     * The First Round where there are cards on the table: The flop adds 3 cards to community hand
+     **/
     public void FlopRound(){
         if(getActivePlayerCount() == 1){
             return;
@@ -438,6 +453,9 @@ public class PokerGame {
         runBettingRound(startingPlayer);
     }
 
+    /**
+     * Adds 1 card to Community Hand
+     **/
     public void TurnRound(){
         if(getActivePlayerCount() == 1){
             return;
@@ -454,6 +472,10 @@ public class PokerGame {
         runBettingRound(startingPlayer);
     }
 
+    /**
+     * Final Round
+     * Adds 1 card to Community Hand
+     **/
     public void RiverRound(){
         if(getActivePlayerCount() == 1){
             return;

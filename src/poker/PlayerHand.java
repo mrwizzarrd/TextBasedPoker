@@ -12,7 +12,7 @@ public class PlayerHand extends Hand {
 
     @Override
     public String toString(){
-        String HandString = "[%card1%]  [%card2%]";
+        String HandString = "[%card1% %card2%]";
         HandString = HandString.replace("%card1%", this.cards.get(0).toString());
         HandString = HandString.replace("%card2%", this.cards.get(1).toString());
         return HandString;

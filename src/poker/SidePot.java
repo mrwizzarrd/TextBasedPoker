@@ -2,6 +2,12 @@ package poker;
 
 import java.util.*;
 
+
+/**
+ * The object SidePot is used when the betting round requires a Side Pot for all in bets
+ * Contains properties: amount (The pot amount) and eligible players
+**/
+
 public class SidePot {
     private int amount;
     private final List<Player> eligiblePlayers;

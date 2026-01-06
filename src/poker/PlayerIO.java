@@ -1,11 +1,13 @@
 package poker;
 
 import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.HashMap;
 
+/**
+ * All input output functions for prompting players
+ * might combine into the GameIO class
+ **/
 public class PlayerIO {
-    private static Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = new Scanner(System.in);
     public static int getBetAmount(Player p, int minBetAmount){
         System.out.printf("Player %s, Choose Amount To Bet\n>", p.getName());
         
@@ -36,7 +38,7 @@ public class PlayerIO {
 
     public static PlayerAction getPlayerAction(Player p, boolean CanCheck){        
         while(true){
-            System.out.printf("Player %s, Choose Your Action\n", p.getName());
+            System.out.printf("%s, Choose Your Action\n", p.getName());
             if(!CanCheck){
                 System.out.println("C: Call");
             } else{

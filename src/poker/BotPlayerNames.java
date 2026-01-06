@@ -2,7 +2,6 @@ package poker;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class BotPlayerNames {
 
@@ -21,8 +20,6 @@ public class BotPlayerNames {
         names.add("Claptrap (BOT)");
         names.add("Handsome Jack (BOT)");
         names.add("Wheatley (BOT)");
-        names.add("R2-D2 (BOT)");
-        names.add("C-3PO (BOT)");
         names.add("Big Brother (BOT)");
         names.add("Wall-E (BOT)");
         names.add("Wilhelm (BOT)");
@@ -30,10 +27,16 @@ public class BotPlayerNames {
         names.add("Liberty Prime (BOT)");
         names.add("Codsworth (BOT)");
         names.add("Ada (BOT)");
-        names.add("K-2SO (BOT)");
         names.add("NullPointerException (BOT)");
         names.add("SegFault (BOT)");
         names.add("Stack Overflow (BOT) ");
+        names.add("Skye (BOT) ");
+        names.add("Walter (BOT) ");
+        names.add("Rocky (BOT) ");
+        names.add("ChatGPT (BOT) ");
+        names.add("Claude (BOT) ");
+        names.add("Deepseek (BOT) ");
+        names.add(" (BOT) ");
     }
 
     public static String getName(){

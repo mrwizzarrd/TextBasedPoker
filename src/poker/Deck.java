@@ -50,8 +50,8 @@ public class Deck {
     }
 
     public Card drawCard(){
-        Card drawnCard = this.deck.get(0);
-        this.deck.remove(0);
+        Card drawnCard = this.deck.getFirst();
+        this.deck.removeFirst();
         return drawnCard;
     }
 
