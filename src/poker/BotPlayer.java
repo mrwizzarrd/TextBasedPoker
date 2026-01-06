@@ -160,7 +160,7 @@ public class BotPlayer extends Player{
     @Override
     public PlayerAction getPlayerAction(boolean canCheck, PokerGame game){
         int roll = (int) (Math.random() * 100);
-
+        calculateConfidence(game.getActionLog(), game);
         float decisionPercent = calculateDecisionPercent();
 
         PlayerAction callCheck = canCheck ? PlayerAction.CHECK : PlayerAction.CALL;

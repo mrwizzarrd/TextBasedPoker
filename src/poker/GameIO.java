@@ -225,7 +225,7 @@ public class GameIO {
             String actionTag = "-";
             if(lastAction != null) {
                if(lastAction.getBetAmount() != 0){
-                   actionTag = String.valueOf(lastAction.getBetAmount());
+                   actionTag = "R " + lastAction.getBetAmount();
                } else if (lastAction.getAction() == PlayerAction.FOLD || tp.hasFolded()) {
                    actionTag = "(FOLDED)";
                } else {

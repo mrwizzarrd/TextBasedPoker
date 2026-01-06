@@ -36,7 +36,7 @@ public class BotPlayerNames {
         names.add("ChatGPT (BOT) ");
         names.add("Claude (BOT) ");
         names.add("Deepseek (BOT) ");
-        names.add(" (BOT) ");
+        names.add("Chase (BOT) ");
     }
 
     public static String getName(){

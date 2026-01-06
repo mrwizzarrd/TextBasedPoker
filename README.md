@@ -8,6 +8,7 @@ Right now this project is dedicated to learning applications of object oriented 
 - Basic Data Structures/Algorithms
 - Refresher on Object Oriented Design and OOP Concepts such as Inheritence/Polymorphism
 - Clean User Interface Design
+- Bot player decision making
 
 ## How to use
 
@@ -32,13 +33,18 @@ make run
 
 ## Changelog
 
+### 1.0.7 1/6/26
+- Updated build.bat for Windows users to see the unicode suit symbols
+- made the last action tag more readable
+- Added Bot Player: Chase
+
 ### 1.0.6 1/5/26
 - Polished UI
 - Changed card display from [RANK of SUIT] to [{Rank Symbol}{Suit Symbol}]
 
 
 ## The future of this project
-TBD
+I want to make the bots better, right now it's alright but needs tweaking
 
      
     

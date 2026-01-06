@@ -3,7 +3,7 @@ package poker;
 import java.util.ArrayList;
 
 public class Game {
-    private static String version = "1.0.6";
+    private static String version = "1.0.7";
     public static void main(String[] args) {
 
         while (true) {

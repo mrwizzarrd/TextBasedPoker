@@ -3,6 +3,8 @@ setlocal enabledelayedexpansion
 
 Title Building TextBasedPoker...
 
+chcp 65001
+
 echo ==================================
 echo Compiling Java Project: TextBasedPoker
 echo ==================================
@@ -57,7 +59,7 @@ set MAIN_CLASS=poker.Game
 echo running %MAIN_CLASS%...
 echo ==================================
 
-java -cp out %MAIN_CLASS%
+java -Dfile.encoding=UTF-8 -cp out %MAIN_CLASS%
 
 
 echo.
